@@ -14,7 +14,7 @@ import { buildVariableDefinitions, buildVariableValues, structureSignature } fro
 
 class PvpDevInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
   private config: ModuleConfig = normalizeConfig(undefined)
-  private state: PvpState = { playlists: [], transportState: {} }
+  private state: PvpState = { playlists: [], workspaceTransport: [] }
   private pollTimer: NodeJS.Timeout | undefined
   private pollInFlight = false
   private lastStructureSig = ''
@@ -74,12 +74,12 @@ class PvpDevInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
     this.pollInFlight = true
 
     try {
-      const [playlists, transportState] = await Promise.all([
+      const [playlists, workspaceTransport] = await Promise.all([
         getPlaylists(this.config, this.secrets),
         getTransportState(this.config, this.secrets),
       ])
 
-      this.state = { playlists, transportState }
+      this.state = { playlists, workspaceTransport }
 
       const nextSig = structureSignature(this.state)
       if (nextSig !== this.lastStructureSig) {

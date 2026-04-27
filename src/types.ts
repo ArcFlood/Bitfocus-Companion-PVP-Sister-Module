@@ -15,7 +15,9 @@ export interface PvpCue {
 }
 
 export interface PvpPlaylist {
+  uuid: string
   name: string
+  path: string
   items: PvpCue[]
 }
 
@@ -24,9 +26,13 @@ export interface TransportState {
     uuid?: string
     name?: string
   }
+  layer?: {
+    uuid?: string
+    name?: string
+  }
 }
 
 export interface PvpState {
   playlists: PvpPlaylist[]
-  transportState: TransportState
+  workspaceTransport: TransportState[]
 }

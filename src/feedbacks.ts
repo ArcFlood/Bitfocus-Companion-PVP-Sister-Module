@@ -33,9 +33,11 @@ export function getFeedbackDefinitions(getState: () => PvpState): CompanionFeedb
         const state = getState()
         const playlist = state.playlists[Number(feedback.options.playlistIndex)]
         const cue = playlist?.items?.[Number(feedback.options.cueIndex)]
-        const activeUuid = state.transportState.playingItem?.uuid
 
-        return Boolean(cue?.uuid && activeUuid && cue.uuid === activeUuid)
+        return Boolean(
+          cue?.uuid &&
+            state.workspaceTransport.some((transport) => transport.playingItem?.uuid === cue.uuid),
+        )
       },
     },
   }
