@@ -1,0 +1,22 @@
+{
+  "name": "companion-module-renewedvision-pvp-dev",
+  "version": "0.0.1",
+  "license": "MIT",
+  "type": "commonjs",
+  "main": "dist/main.js",
+  "files": [
+    "companion",
+    "dist"
+  ],
+  "scripts": {
+    "build": "companion-module-build",
+    "lint": "companion-module-lint"
+  },
+  "dependencies": {
+    "@companion-module/base": "^1.10.0"
+  },
+  "devDependencies": {
+    "@companion-module/tools": "^1.10.0",
+    "typescript": "^5.6.3"
+  }
+}

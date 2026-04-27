@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/bitfocus/companion-module-tools/main/packages/companion-module-validate/manifest-schema.json",
+  "id": "renewedvision-pvp-dev",
+  "name": "PVP Sister Module (Dev)",
+  "shortname": "pvp-dev",
+  "description": "Companion sister module for ProVideoPlayer cue variables and active cue feedback.",
+  "version": "0.0.1",
+  "license": "MIT",
+  "repository": "https://github.com/example/companion-module-renewedvision-pvp-dev",
+  "runtime": {
+    "type": "node18",
+    "api": "nodejs-ipc",
+    "apiVersion": "1.10.0",
+    "entrypoint": "../dist/main.js"
+  },
+  "manufacturer": "Renewed Vision",
+  "product": "ProVideoPlayer",
+  "keywords": ["pvp", "renewedvision", "video"]
+}
