@@ -19,6 +19,7 @@ export function getFeedbackDefinitions(getState: () => PvpState): CompanionFeedb
           id: 'playlistIndex',
           label: 'Playlist Index',
           min: 0,
+          max: 999,
           default: 0,
         },
         {
@@ -26,6 +27,7 @@ export function getFeedbackDefinitions(getState: () => PvpState): CompanionFeedb
           id: 'cueIndex',
           label: 'Cue Index',
           min: 0,
+          max: 999,
           default: 0,
         },
       ],

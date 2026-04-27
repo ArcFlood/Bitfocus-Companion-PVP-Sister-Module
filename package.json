@@ -9,14 +9,14 @@
     "dist"
   ],
   "scripts": {
-    "build": "companion-module-build",
+    "build": "tsc && companion-module-build",
     "lint": "companion-module-lint"
   },
   "dependencies": {
     "@companion-module/base": "^1.10.0"
   },
   "devDependencies": {
-    "@companion-module/tools": "^1.10.0",
+    "@companion-module/tools": "^2.0.4",
     "typescript": "^5.6.3"
   }
 }

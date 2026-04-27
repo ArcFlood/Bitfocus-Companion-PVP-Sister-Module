@@ -2,7 +2,7 @@ import {
   InstanceBase,
   InstanceStatus,
   runEntrypoint,
-  type CompanionOptionValues,
+  type CompanionVariableValues,
 } from '@companion-module/base'
 import { getPlaylists, getTransportState } from './api'
 import { getConfigFields, normalizeConfig } from './config'
@@ -14,6 +14,7 @@ import { buildVariableDefinitions, buildVariableValues, structureSignature } fro
 
 class PvpDevInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
   private config: ModuleConfig = normalizeConfig(undefined)
+  private secrets: ModuleSecrets = {}
   private state: PvpState = { playlists: [], workspaceTransport: [] }
   private pollTimer: NodeJS.Timeout | undefined
   private pollInFlight = false
@@ -23,8 +24,9 @@ class PvpDevInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
     return getConfigFields()
   }
 
-  async init(config: ModuleConfig): Promise<void> {
+  async init(config: ModuleConfig, _isFirstInit: boolean, secrets: ModuleSecrets): Promise<void> {
     this.config = normalizeConfig(config)
+    this.secrets = secrets ?? {}
 
     this.setActionDefinitions({})
     this.setFeedbackDefinitions(getFeedbackDefinitions(() => this.state))
@@ -34,8 +36,9 @@ class PvpDevInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
     this.startPolling()
   }
 
-  async configUpdated(config: ModuleConfig): Promise<void> {
+  async configUpdated(config: ModuleConfig, secrets: ModuleSecrets): Promise<void> {
     this.config = normalizeConfig(config)
+    this.secrets = secrets ?? {}
     this.stopPolling()
     this.startPolling()
   }
@@ -87,7 +90,7 @@ class PvpDevInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
         this.lastStructureSig = nextSig
       }
 
-      this.setVariableValues(buildVariableValues(this.state) as CompanionOptionValues)
+      this.setVariableValues(buildVariableValues(this.state) as CompanionVariableValues)
       this.checkFeedbacks()
       this.updateStatus(InstanceStatus.Ok)
     } catch (error: unknown) {

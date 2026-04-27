@@ -5,6 +5,7 @@ export function getPresetDefinitions(): CompanionPresetDefinitions {
   return {
     activeCue_0_0: {
       type: 'button',
+      category: 'Cue Names',
       name: 'Cue 0.0 Active Highlight',
       style: {
         text: '$(renewedvision-pvp-dev:playlist_0_cue_0_name)',
