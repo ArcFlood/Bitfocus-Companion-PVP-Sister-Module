@@ -1,6 +1,13 @@
 import type { CompanionFeedbackDefinitions } from '@companion-module/base'
-import type { PvpState } from './types'
+import type { PvpEffect, PvpLayer, PvpPlaylist, PvpState, TransportState } from './types'
 
+export const FEEDBACK_ID_PLAYLIST_CONDITION = 'playlist_condition'
+export const FEEDBACK_ID_CUE_CONDITION = 'cue_condition'
+export const FEEDBACK_ID_LAYER_CONDITION = 'layer_condition'
+export const FEEDBACK_ID_TRANSPORT_CONDITION = 'transport_condition'
+export const FEEDBACK_ID_WORKSPACE_CONDITION = 'workspace_condition'
+export const FEEDBACK_ID_EFFECT_CONDITION = 'effect_condition'
+export const FEEDBACK_ID_CATALOG_CONDITION = 'catalog_condition'
 export const FEEDBACK_ID_CUE_IS_ACTIVE = 'cue_is_active'
 export const FEEDBACK_ID_PLAYLIST_IS_ACTIVE = 'playlist_is_active'
 export const FEEDBACK_ID_LAYER_IS_ACTIVE = 'layer_is_active'
@@ -22,31 +29,160 @@ export const FEEDBACK_ID_LAYER_PLAYBACK_RATE_COMPARE = 'layer_playback_rate_comp
 const COMPARE_CHOICES = [
   { id: 'eq', label: '=' },
   { id: 'ne', label: '!=' },
+  { id: 'contains', label: 'contains' },
+  { id: 'not_contains', label: 'does not contain' },
   { id: 'gt', label: '>' },
   { id: 'gte', label: '>=' },
   { id: 'lt', label: '<' },
   { id: 'lte', label: '<=' },
+  { id: 'truthy', label: 'is true/yes' },
+  { id: 'falsy', label: 'is false/no' },
+]
+
+const PLAYLIST_FIELD_CHOICES = [
+  { id: 'name', label: 'Name' },
+  { id: 'uuid', label: 'UUID' },
+  { id: 'path', label: 'Path' },
+  { id: 'cue_count', label: 'Cue Count' },
+  { id: 'child_count', label: 'Child Count' },
+  { id: 'is_video_input', label: 'Is Video Input' },
+  { id: 'is_active', label: 'Is Active' },
+]
+
+const CUE_FIELD_CHOICES = [
+  { id: 'name', label: 'Name' },
+  { id: 'uuid', label: 'UUID' },
+  { id: 'playlist_name', label: 'Playlist Name' },
+  { id: 'playlist_uuid', label: 'Playlist UUID' },
+  { id: 'is_playing', label: 'Is Playing' },
+  { id: 'active_layer_name', label: 'Active Layer Name' },
+  { id: 'active_layer_uuid', label: 'Active Layer UUID' },
+]
+
+const LAYER_FIELD_CHOICES = [
+  { id: 'name', label: 'Name' },
+  { id: 'uuid', label: 'UUID' },
+  { id: 'is_active', label: 'Is Active' },
+  { id: 'is_hidden', label: 'Is Hidden' },
+  { id: 'is_muted', label: 'Is Muted' },
+  { id: 'opacity', label: 'Opacity' },
+  { id: 'target_set_name', label: 'Target Set Name' },
+  { id: 'target_set_uuid', label: 'Target Set UUID' },
+  { id: 'effect_preset_name', label: 'Effect Preset Name' },
+  { id: 'effect_preset_uuid', label: 'Effect Preset UUID' },
+  { id: 'layer_preset_name', label: 'Layer Preset Name' },
+  { id: 'layer_preset_id', label: 'Layer Preset ID' },
+  { id: 'blend_mode_name', label: 'Blend Mode Name' },
+  { id: 'blend_mode_id', label: 'Blend Mode ID' },
+  { id: 'blend_type', label: 'Blend Type' },
+  { id: 'blend_opacity', label: 'Blend Opacity' },
+  { id: 'blend_is_inverted', label: 'Blend Is Inverted' },
+  { id: 'transition_name', label: 'Transition Name' },
+  { id: 'transition_uuid', label: 'Transition UUID' },
+  { id: 'transition_enabled', label: 'Transition Enabled' },
+  { id: 'transition_duration', label: 'Transition Duration' },
+  { id: 'transition_variable_count', label: 'Transition Variable Count' },
+  { id: 'effects', label: 'Effects' },
+  { id: 'effect_count', label: 'Effect Count' },
+]
+
+const TRANSPORT_FIELD_CHOICES = [
+  { id: 'layer_name', label: 'Layer Name' },
+  { id: 'layer_uuid', label: 'Layer UUID' },
+  { id: 'playing_item_name', label: 'Playing Item Name' },
+  { id: 'playing_item_uuid', label: 'Playing Item UUID' },
+  { id: 'playing_media_name', label: 'Playing Media Name' },
+  { id: 'playing_media_uuid', label: 'Playing Media UUID' },
+  { id: 'is_playing', label: 'Is Playing' },
+  { id: 'is_scrubbing', label: 'Is Scrubbing' },
+  { id: 'playback_rate', label: 'Playback Rate' },
+  { id: 'time_elapsed', label: 'Time Elapsed' },
+  { id: 'time_remaining', label: 'Time Remaining' },
+]
+
+const WORKSPACE_FIELD_CHOICES = [
+  { id: 'connection_status', label: 'Connection Status' },
+  { id: 'last_poll_time', label: 'Last Poll Time' },
+  { id: 'last_poll_error', label: 'Last Poll Error' },
+  { id: 'playlist_count', label: 'Playlist Count' },
+  { id: 'cue_count_total', label: 'Total Cue Count' },
+  { id: 'layer_count', label: 'Layer Count' },
+  { id: 'active_layer_count', label: 'Active Layer Count' },
+  { id: 'active_cue_count', label: 'Active Cue Count' },
+  { id: 'workspace_is_clear', label: 'Workspace Is Clear' },
+  { id: 'workspace_has_active_media', label: 'Workspace Has Active Media' },
+  { id: 'workspace_time_remaining_lowest', label: 'Lowest Time Remaining' },
+  { id: 'workspace_current_media_names', label: 'Current Media Names' },
+  { id: 'workspace_current_cue_names', label: 'Current Cue Names' },
+  { id: 'workspace_effects', label: 'Workspace Effects' },
+  { id: 'workspace_effect_count', label: 'Workspace Effect Count' },
+  { id: 'workspace_effect_preset_name', label: 'Workspace Effect Preset Name' },
+  { id: 'workspace_effect_preset_uuid', label: 'Workspace Effect Preset UUID' },
+  { id: 'workspace_effect_preset_effect_count', label: 'Workspace Effect Preset Effect Count' },
+  { id: 'workspace_transition_name', label: 'Workspace Transition Name' },
+  { id: 'workspace_transition_uuid', label: 'Workspace Transition UUID' },
+  { id: 'workspace_transition_enabled', label: 'Workspace Transition Enabled' },
+  { id: 'workspace_transition_duration', label: 'Workspace Transition Duration' },
+  { id: 'workspace_transition_variable_count', label: 'Workspace Transition Variable Count' },
+]
+
+const EFFECT_FIELD_CHOICES = [
+  { id: 'name', label: 'Name' },
+  { id: 'uuid', label: 'UUID' },
+  { id: 'enabled', label: 'Enabled' },
+  { id: 'variable_count', label: 'Variable Count' },
+  { id: 'variable_name', label: 'Variable Name' },
+  { id: 'variable_type', label: 'Variable Type' },
+  { id: 'variable_value', label: 'Variable Value' },
+  { id: 'variable_min', label: 'Variable Min' },
+  { id: 'variable_max', label: 'Variable Max' },
+  { id: 'variable_color', label: 'Variable Color' },
+  { id: 'variable_default', label: 'Variable Default' },
+]
+
+const CATALOG_FIELD_CHOICES = [
+  { id: 'name', label: 'Name' },
+  { id: 'uuid', label: 'UUID' },
+  { id: 'id', label: 'ID' },
+  { id: 'enabled', label: 'Enabled' },
+  { id: 'effect_count', label: 'Effect Count' },
+  { id: 'variable_count', label: 'Variable Count' },
 ]
 
 export function getFeedbackDefinitions(getState: () => PvpState): CompanionFeedbackDefinitions {
   return {
-    [FEEDBACK_ID_CUE_IS_ACTIVE]: {
+    [FEEDBACK_ID_PLAYLIST_CONDITION]: {
       type: 'boolean',
-      name: 'Cue is active',
-      description: 'True when selected playlist/cue is currently active in PVP',
+      name: 'Playlist condition',
+      description: 'Checks one playlist property selected from the dropdown',
+      defaultStyle: {
+        bgcolor: 0x0044aa,
+        color: 0xffffff,
+      },
+      options: [
+        playlistIndexOption(),
+        dropdownOption('field', 'Field', PLAYLIST_FIELD_CHOICES, 'is_active'),
+        compareOption('truthy'),
+        textOption('expected', 'Expected Value'),
+      ],
+      callback: (feedback) => {
+        const state = getState()
+        const playlist = state.playlists[Number(feedback.options.playlistIndex)]
+        const actual = getPlaylistField(state, playlist, String(feedback.options.field ?? ''))
+
+        return compareValues(actual, String(feedback.options.comparison), feedback.options.expected)
+      },
+    },
+    [FEEDBACK_ID_CUE_CONDITION]: {
+      type: 'boolean',
+      name: 'Cue condition',
+      description: 'Checks one cue property selected from the dropdown',
       defaultStyle: {
         bgcolor: 0x00aa00,
         color: 0xffffff,
       },
       options: [
-        {
-          type: 'number',
-          id: 'playlistIndex',
-          label: 'Playlist Index',
-          min: 0,
-          max: 999,
-          default: 0,
-        },
+        playlistIndexOption(),
         {
           type: 'number',
           id: 'cueIndex',
@@ -55,339 +191,180 @@ export function getFeedbackDefinitions(getState: () => PvpState): CompanionFeedb
           max: 999,
           default: 0,
         },
+        dropdownOption('field', 'Field', CUE_FIELD_CHOICES, 'is_playing'),
+        compareOption('truthy'),
+        textOption('expected', 'Expected Value'),
       ],
       callback: (feedback) => {
         const state = getState()
         const playlist = state.playlists[Number(feedback.options.playlistIndex)]
-        const cue = playlist?.items?.[Number(feedback.options.cueIndex)]
+        const cue = playlist?.items[Number(feedback.options.cueIndex)]
+        const actual = getCueField(state, playlist, cue, String(feedback.options.field ?? ''))
 
-        return Boolean(
-          cue?.uuid &&
-            state.workspaceTransport.some((transport) => transport.playingItem?.uuid === cue.uuid),
-        )
+        return compareValues(actual, String(feedback.options.comparison), feedback.options.expected)
       },
     },
-    [FEEDBACK_ID_PLAYLIST_IS_ACTIVE]: {
+    [FEEDBACK_ID_LAYER_CONDITION]: {
       type: 'boolean',
-      name: 'Playlist is active',
-      description: 'True when any cue in the selected playlist is currently active in PVP',
-      defaultStyle: {
-        bgcolor: 0x0044aa,
-        color: 0xffffff,
-      },
-      options: [
-        {
-          type: 'number',
-          id: 'playlistIndex',
-          label: 'Playlist Index',
-          min: 0,
-          max: 999,
-          default: 0,
-        },
-      ],
-      callback: (feedback) => {
-        const state = getState()
-        const playlist = state.playlists[Number(feedback.options.playlistIndex)]
-        if (!playlist) return false
-
-        const cueUuids = new Set(playlist.items.map((cue) => cue.uuid).filter(Boolean))
-        return state.workspaceTransport.some((transport) => {
-          const activeCueUuid = transport.playingItem?.uuid
-          return Boolean(activeCueUuid && cueUuids.has(activeCueUuid))
-        })
-      },
-    },
-    [FEEDBACK_ID_LAYER_IS_ACTIVE]: {
-      type: 'boolean',
-      name: 'Layer is active',
-      description: 'True when the selected PVP layer has an active transport state',
+      name: 'Layer condition',
+      description: 'Checks one layer property selected from the dropdown',
       defaultStyle: {
         bgcolor: 0xaa5500,
         color: 0xffffff,
       },
       options: [
-        {
-          type: 'dropdown',
-          id: 'matchMode',
-          label: 'Match Layer By',
-          default: 'index',
-          choices: [
-            { id: 'index', label: 'Layer Index' },
-            { id: 'name', label: 'Layer Name' },
-          ],
-        },
-        {
-          type: 'number',
-          id: 'layerIndex',
-          label: 'Layer Index',
-          min: 0,
-          max: 999,
-          default: 0,
-        },
-        {
-          type: 'textinput',
-          id: 'layerName',
-          label: 'Layer Name',
-          default: '',
-        },
+        layerIndexOption(),
+        dropdownOption('field', 'Field', LAYER_FIELD_CHOICES, 'is_active'),
+        compareOption('truthy'),
+        textOption('expected', 'Expected Value'),
       ],
       callback: (feedback) => {
         const state = getState()
-        const matchMode = String(feedback.options.matchMode ?? 'index')
-
-        if (matchMode === 'name') {
-          const layerName = String(feedback.options.layerName ?? '').trim()
-          if (!layerName) return false
-
-          return state.workspaceTransport.some(
-            (transport) =>
-              transport.layer?.name === layerName && Boolean(transport.playingItem?.uuid),
-          )
-        }
-
         const layerIndex = Number(feedback.options.layerIndex)
-        const transport = state.workspaceTransport[layerIndex]
-        return Boolean(transport?.layer && transport.playingItem?.uuid)
+        const layer = getLayer(state, layerIndex)
+        const actual = getLayerField(state, layer, layerIndex, String(feedback.options.field ?? ''))
+
+        return compareValues(actual, String(feedback.options.comparison), feedback.options.expected)
       },
     },
-    [FEEDBACK_ID_LAYER_IS_MUTED]: {
+    [FEEDBACK_ID_TRANSPORT_CONDITION]: {
       type: 'boolean',
-      name: 'Layer is muted',
-      description: 'True when the selected PVP layer is muted',
+      name: 'Transport condition',
+      description: 'Checks one transport property selected from the dropdown',
       defaultStyle: {
-        bgcolor: 0x777777,
+        bgcolor: 0x008855,
         color: 0xffffff,
       },
-      options: [layerIndexOption()],
-      callback: (feedback) => getLayer(getState(), Number(feedback.options.layerIndex))?.isMuted === true,
-    },
-    [FEEDBACK_ID_LAYER_IS_HIDDEN]: {
-      type: 'boolean',
-      name: 'Layer is hidden',
-      description: 'True when the selected PVP layer is hidden',
-      defaultStyle: {
-        bgcolor: 0x222222,
-        color: 0xffffff,
+      options: [
+        layerIndexOption(),
+        dropdownOption('field', 'Field', TRANSPORT_FIELD_CHOICES, 'is_playing'),
+        compareOption('truthy'),
+        textOption('expected', 'Expected Value'),
+      ],
+      callback: (feedback) => {
+        const state = getState()
+        const transport = getTransport(state, Number(feedback.options.layerIndex))
+        const actual = getTransportField(transport, String(feedback.options.field ?? ''))
+
+        return compareValues(actual, String(feedback.options.comparison), feedback.options.expected)
       },
-      options: [layerIndexOption()],
-      callback: (feedback) => getLayer(getState(), Number(feedback.options.layerIndex))?.isHidden === true,
     },
-    [FEEDBACK_ID_LAYER_OPACITY_COMPARE]: {
+    [FEEDBACK_ID_WORKSPACE_CONDITION]: {
       type: 'boolean',
-      name: 'Layer opacity compare',
-      description: 'True when the selected layer opacity matches the comparison',
+      name: 'Workspace condition',
+      description: 'Checks one workspace property selected from the dropdown',
       defaultStyle: {
         bgcolor: 0x336699,
         color: 0xffffff,
       },
-      options: [layerIndexOption(), compareOption(), valueOption('Opacity Value', 0, 1, 0.5)],
-      callback: (feedback) =>
-        compareNumbers(
-          getLayer(getState(), Number(feedback.options.layerIndex))?.opacity,
-          String(feedback.options.comparison),
-          Number(feedback.options.value),
-        ),
-    },
-    [FEEDBACK_ID_LAYER_TARGET_SET_IS]: {
-      type: 'boolean',
-      name: 'Layer target set is',
-      description: 'True when the selected layer target set UUID matches',
-      defaultStyle: {
-        bgcolor: 0x225522,
-        color: 0xffffff,
+      options: [
+        dropdownOption('field', 'Field', WORKSPACE_FIELD_CHOICES, 'workspace_has_active_media'),
+        compareOption('truthy'),
+        textOption('expected', 'Expected Value'),
+      ],
+      callback: (feedback) => {
+        const state = getState()
+        const actual = getWorkspaceField(state, String(feedback.options.field ?? ''))
+
+        return compareValues(actual, String(feedback.options.comparison), feedback.options.expected)
       },
-      options: [layerIndexOption(), textOption('targetSetUUID', 'Target Set UUID')],
-      callback: (feedback) =>
-        getLayer(getState(), Number(feedback.options.layerIndex))?.targetSetUUID ===
-        String(feedback.options.targetSetUUID ?? '').trim(),
     },
-    [FEEDBACK_ID_LAYER_EFFECT_PRESET_IS]: {
+    [FEEDBACK_ID_EFFECT_CONDITION]: {
       type: 'boolean',
-      name: 'Layer effect preset is',
-      description: 'True when the selected layer effect preset UUID matches',
-      defaultStyle: {
-        bgcolor: 0x552266,
-        color: 0xffffff,
-      },
-      options: [layerIndexOption(), textOption('effectPresetUUID', 'Effect Preset UUID')],
-      callback: (feedback) =>
-        getLayer(getState(), Number(feedback.options.layerIndex))?.effectPresetUUID ===
-        String(feedback.options.effectPresetUUID ?? '').trim(),
-    },
-    [FEEDBACK_ID_LAYER_EFFECT_IS_ACTIVE]: {
-      type: 'boolean',
-      name: 'Layer effect is active',
-      description: 'True when the selected layer has an enabled effect by name or UUID',
+      name: 'Effect condition',
+      description: 'Checks one layer or workspace effect property selected from the dropdown',
       defaultStyle: {
         bgcolor: 0x663399,
         color: 0xffffff,
       },
       options: [
+        dropdownOption(
+          'scope',
+          'Scope',
+          [
+            { id: 'layer', label: 'Layer Effect' },
+            { id: 'workspace', label: 'Workspace Effect' },
+          ],
+          'layer',
+        ),
         layerIndexOption(),
         {
-          type: 'dropdown',
-          id: 'matchMode',
-          label: 'Match Effect By',
-          default: 'name',
-          choices: [
-            { id: 'name', label: 'Effect Name' },
-            { id: 'uuid', label: 'Effect UUID' },
-          ],
+          type: 'number',
+          id: 'effectIndex',
+          label: 'Effect Index',
+          min: 0,
+          max: 999,
+          default: 0,
         },
-        textOption('effectValue', 'Effect Name/UUID'),
-      ],
-      callback: (feedback) => {
-        const layer = getLayer(getState(), Number(feedback.options.layerIndex))
-        const matchMode = String(feedback.options.matchMode ?? 'name')
-        const value = String(feedback.options.effectValue ?? '').trim()
-        if (!layer || !value) return false
-
-        return layer.effects.some((effect) => {
-          const candidate = matchMode === 'uuid' ? effect.uuid : effect.name
-          return candidate === value && effect.enabled !== false
-        })
-      },
-    },
-    [FEEDBACK_ID_LAYER_TRANSITION_IS]: {
-      type: 'boolean',
-      name: 'Layer transition is',
-      description: 'True when the selected layer transition matches by name or UUID',
-      defaultStyle: {
-        bgcolor: 0x8844aa,
-        color: 0xffffff,
-      },
-      options: [
-        layerIndexOption(),
         {
-          type: 'dropdown',
-          id: 'matchMode',
-          label: 'Match Transition By',
-          default: 'name',
-          choices: [
-            { id: 'name', label: 'Transition Name' },
-            { id: 'uuid', label: 'Transition UUID' },
-          ],
+          type: 'number',
+          id: 'variableIndex',
+          label: 'Variable Index',
+          min: 0,
+          max: 999,
+          default: 0,
         },
-        textOption('transitionValue', 'Transition Name/UUID'),
+        dropdownOption('field', 'Field', EFFECT_FIELD_CHOICES, 'enabled'),
+        compareOption('truthy'),
+        textOption('expected', 'Expected Value'),
       ],
       callback: (feedback) => {
-        const layer = getLayer(getState(), Number(feedback.options.layerIndex))
-        const matchMode = String(feedback.options.matchMode ?? 'name')
-        const value = String(feedback.options.transitionValue ?? '').trim()
-        const candidate = matchMode === 'uuid' ? layer?.transition?.uuid : layer?.transition?.name
+        const state = getState()
+        const effect = getEffect(
+          state,
+          String(feedback.options.scope ?? 'layer'),
+          Number(feedback.options.layerIndex),
+          Number(feedback.options.effectIndex),
+        )
+        const actual = getEffectField(effect, Number(feedback.options.variableIndex), String(feedback.options.field ?? ''))
 
-        return Boolean(value && candidate === value)
+        return compareValues(actual, String(feedback.options.comparison), feedback.options.expected)
       },
     },
-    [FEEDBACK_ID_LAYER_TRANSITION_DURATION_COMPARE]: {
+    [FEEDBACK_ID_CATALOG_CONDITION]: {
       type: 'boolean',
-      name: 'Layer transition duration compare',
-      description: 'True when the selected layer transition duration matches the comparison',
+      name: 'Catalog condition',
+      description: 'Checks one target set, preset, blend mode, transition, or available effect property',
       defaultStyle: {
         bgcolor: 0x5555aa,
         color: 0xffffff,
       },
-      options: [layerIndexOption(), compareOption(), valueOption('Duration Seconds', 0, 5, 0.5)],
-      callback: (feedback) =>
-        compareNumbers(
-          getLayer(getState(), Number(feedback.options.layerIndex))?.transitionDuration,
-          String(feedback.options.comparison),
-          Number(feedback.options.value),
+      options: [
+        dropdownOption(
+          'catalog',
+          'Catalog',
+          [
+            { id: 'target_set', label: 'Target Set' },
+            { id: 'blend_mode', label: 'Blend Mode' },
+            { id: 'layer_preset', label: 'Layer Preset' },
+            { id: 'effect_preset', label: 'Effect Preset' },
+            { id: 'transition', label: 'Transition' },
+            { id: 'available_effect', label: 'Available Effect' },
+          ],
+          'target_set',
         ),
-    },
-    [FEEDBACK_ID_LAYER_PLAYING_ITEM_IS]: {
-      type: 'boolean',
-      name: 'Layer playing item is',
-      description: 'True when the selected layer is playing a cue by name or UUID',
-      defaultStyle: {
-        bgcolor: 0x008855,
-        color: 0xffffff,
-      },
-      options: [layerIndexOption(), matchNameOrUuidOption('Item'), textOption('itemValue', 'Item Name/UUID')],
+        {
+          type: 'number',
+          id: 'catalogIndex',
+          label: 'Catalog Index',
+          min: 0,
+          max: 999,
+          default: 0,
+        },
+        dropdownOption('field', 'Field', CATALOG_FIELD_CHOICES, 'name'),
+        compareOption('eq'),
+        textOption('expected', 'Expected Value'),
+      ],
       callback: (feedback) => {
-        const transport = getTransport(getState(), Number(feedback.options.layerIndex))
-        const candidate =
-          String(feedback.options.matchMode ?? 'name') === 'uuid'
-            ? transport?.playingItem?.uuid
-            : transport?.playingItem?.name
+        const actual = getCatalogField(
+          getState(),
+          String(feedback.options.catalog ?? ''),
+          Number(feedback.options.catalogIndex),
+          String(feedback.options.field ?? ''),
+        )
 
-        return Boolean(candidate && candidate === String(feedback.options.itemValue ?? '').trim())
+        return compareValues(actual, String(feedback.options.comparison), feedback.options.expected)
       },
-    },
-    [FEEDBACK_ID_LAYER_PLAYING_MEDIA_IS]: {
-      type: 'boolean',
-      name: 'Layer playing media is',
-      description: 'True when the selected layer is playing media by name or UUID',
-      defaultStyle: {
-        bgcolor: 0x008888,
-        color: 0xffffff,
-      },
-      options: [layerIndexOption(), matchNameOrUuidOption('Media'), textOption('mediaValue', 'Media Name/UUID')],
-      callback: (feedback) => {
-        const transport = getTransport(getState(), Number(feedback.options.layerIndex))
-        const candidate =
-          String(feedback.options.matchMode ?? 'name') === 'uuid'
-            ? transport?.playingMedia?.uuid
-            : transport?.playingMedia?.name
-
-        return Boolean(candidate && candidate === String(feedback.options.mediaValue ?? '').trim())
-      },
-    },
-    [FEEDBACK_ID_LAYER_TIME_REMAINING_COMPARE]: {
-      type: 'boolean',
-      name: 'Layer time remaining compare',
-      description: 'True when the selected layer time remaining matches the comparison',
-      defaultStyle: {
-        bgcolor: 0xbb0000,
-        color: 0xffffff,
-      },
-      options: [layerIndexOption(), compareOption('lte'), valueOption('Seconds Remaining', 0, 86400, 10)],
-      callback: (feedback) =>
-        compareNumbers(
-          getTransport(getState(), Number(feedback.options.layerIndex))?.timeRemaining,
-          String(feedback.options.comparison),
-          Number(feedback.options.value),
-        ),
-    },
-    [FEEDBACK_ID_LAYER_IS_PLAYING]: {
-      type: 'boolean',
-      name: 'Layer is playing',
-      description: 'True when the selected layer transport reports playing',
-      defaultStyle: {
-        bgcolor: 0x00aa00,
-        color: 0xffffff,
-      },
-      options: [layerIndexOption()],
-      callback: (feedback) =>
-        getTransport(getState(), Number(feedback.options.layerIndex))?.isPlaying === true,
-    },
-    [FEEDBACK_ID_LAYER_IS_SCRUBBING]: {
-      type: 'boolean',
-      name: 'Layer is scrubbing',
-      description: 'True when the selected layer transport reports scrubbing',
-      defaultStyle: {
-        bgcolor: 0xaa00aa,
-        color: 0xffffff,
-      },
-      options: [layerIndexOption()],
-      callback: (feedback) =>
-        getTransport(getState(), Number(feedback.options.layerIndex))?.isScrubbing === true,
-    },
-    [FEEDBACK_ID_LAYER_PLAYBACK_RATE_COMPARE]: {
-      type: 'boolean',
-      name: 'Layer playback rate compare',
-      description: 'True when the selected layer playback rate matches the comparison',
-      defaultStyle: {
-        bgcolor: 0x999900,
-        color: 0xffffff,
-      },
-      options: [layerIndexOption(), compareOption(), valueOption('Playback Rate', -10, 10, 1)],
-      callback: (feedback) =>
-        compareNumbers(
-          getTransport(getState(), Number(feedback.options.layerIndex))?.playbackRate,
-          String(feedback.options.comparison),
-          Number(feedback.options.value),
-        ),
     },
   }
 }
@@ -398,6 +375,361 @@ function getLayer(state: PvpState, layerIndex: number) {
 
 function getTransport(state: PvpState, layerIndex: number) {
   return state.workspaceTransport[layerIndex]
+}
+
+function getEffect(state: PvpState, scope: string, layerIndex: number, effectIndex: number): PvpEffect | undefined {
+  if (scope === 'workspace') return state.workspaceEffects[effectIndex]
+
+  return getLayer(state, layerIndex)?.effects[effectIndex]
+}
+
+function getPlaylistField(
+  state: PvpState,
+  playlist: PvpPlaylist | undefined,
+  field: string,
+): string | number | boolean | undefined {
+  if (!playlist) return undefined
+
+  switch (field) {
+    case 'name':
+      return playlist.name
+    case 'uuid':
+      return playlist.uuid
+    case 'path':
+      return playlist.path
+    case 'cue_count':
+      return playlist.items.length
+    case 'child_count':
+      return playlist.childCount
+    case 'is_video_input':
+      return playlist.isVideoInput
+    case 'is_active': {
+      const cueUuids = new Set(playlist.items.map((cue) => cue.uuid).filter(Boolean))
+      return state.workspaceTransport.some((transport) => {
+        const activeCueUuid = transport.playingItem?.uuid
+        return Boolean(activeCueUuid && cueUuids.has(activeCueUuid))
+      })
+    }
+    default:
+      return undefined
+  }
+}
+
+function getCueField(
+  state: PvpState,
+  playlist: PvpPlaylist | undefined,
+  cue: { uuid: string; name: string } | undefined,
+  field: string,
+): string | boolean | undefined {
+  if (!playlist || !cue) return undefined
+
+  const activeTransport = state.workspaceTransport.find((transport) => transport.playingItem?.uuid === cue.uuid)
+
+  switch (field) {
+    case 'name':
+      return cue.name
+    case 'uuid':
+      return cue.uuid
+    case 'playlist_name':
+      return playlist.name
+    case 'playlist_uuid':
+      return playlist.uuid
+    case 'is_playing':
+      return Boolean(activeTransport)
+    case 'active_layer_name':
+      return activeTransport?.layer?.name
+    case 'active_layer_uuid':
+      return activeTransport?.layer?.uuid
+    default:
+      return undefined
+  }
+}
+
+function getLayerField(
+  state: PvpState,
+  layer: PvpLayer | TransportState['layer'] | undefined,
+  layerIndex: number,
+  field: string,
+): string | number | boolean | undefined {
+  if (!layer) return undefined
+
+  switch (field) {
+    case 'name':
+      return layer.name
+    case 'uuid':
+      return layer.uuid
+    case 'is_active':
+      return Boolean(state.workspaceTransport[layerIndex]?.playingItem?.uuid)
+    case 'is_hidden':
+      return layer.isHidden
+    case 'is_muted':
+      return layer.isMuted
+    case 'opacity':
+      return layer.opacity
+    case 'target_set_name':
+      return layer.targetSetName
+    case 'target_set_uuid':
+      return layer.targetSetUUID
+    case 'effect_preset_name':
+      return layer.effectPresetName
+    case 'effect_preset_uuid':
+      return layer.effectPresetUUID
+    case 'layer_preset_name':
+      return layer.layerPresetName
+    case 'layer_preset_id':
+      return layer.layerPresetId
+    case 'blend_mode_name':
+      return layer.blendMode?.name ?? layer.blend?.modeName
+    case 'blend_mode_id':
+      return layer.blendMode?.id ?? layer.blend?.modeIndex
+    case 'blend_type':
+      return layer.blend?.type
+    case 'blend_opacity':
+      return layer.blend?.opacity
+    case 'blend_is_inverted':
+      return layer.blend?.isInverted
+    case 'transition_name':
+      return layer.transition?.name
+    case 'transition_uuid':
+      return layer.transition?.uuid
+    case 'transition_enabled':
+      return layer.transition?.enabled
+    case 'transition_duration':
+      return layer.transitionDuration
+    case 'transition_variable_count':
+      return layer.transition?.variables.length ?? 0
+    case 'effects':
+      return layer.effects.map((effect) => effect.name).filter(Boolean).join(', ')
+    case 'effect_count':
+      return layer.effects.length
+    default:
+      return undefined
+  }
+}
+
+function getTransportField(
+  transport: TransportState | undefined,
+  field: string,
+): string | number | boolean | undefined {
+  if (!transport) return undefined
+
+  switch (field) {
+    case 'layer_name':
+      return transport.layer?.name
+    case 'layer_uuid':
+      return transport.layer?.uuid
+    case 'playing_item_name':
+      return transport.playingItem?.name
+    case 'playing_item_uuid':
+      return transport.playingItem?.uuid
+    case 'playing_media_name':
+      return transport.playingMedia?.name
+    case 'playing_media_uuid':
+      return transport.playingMedia?.uuid
+    case 'is_playing':
+      return transport.isPlaying
+    case 'is_scrubbing':
+      return transport.isScrubbing
+    case 'playback_rate':
+      return transport.playbackRate
+    case 'time_elapsed':
+      return transport.timeElapsed
+    case 'time_remaining':
+      return transport.timeRemaining
+    default:
+      return undefined
+  }
+}
+
+function getWorkspaceField(state: PvpState, field: string): string | number | boolean | undefined {
+  const activeTransports = state.workspaceTransport.filter((transport) => Boolean(transport.playingItem?.uuid))
+  const remainingTimes = state.workspaceTransport
+    .map((transport) => transport.timeRemaining)
+    .filter((value): value is number => typeof value === 'number')
+
+  switch (field) {
+    case 'connection_status':
+      return state.lastPollError ? 'error' : 'ok'
+    case 'last_poll_time':
+      return state.lastPollTime
+    case 'last_poll_error':
+      return state.lastPollError
+    case 'playlist_count':
+      return state.playlists.length
+    case 'cue_count_total':
+      return state.playlists.reduce((total, playlist) => total + playlist.items.length, 0)
+    case 'layer_count':
+      return state.layers.length
+    case 'active_layer_count':
+      return activeTransports.length
+    case 'active_cue_count':
+      return new Set(state.workspaceTransport.map((transport) => transport.playingItem?.uuid).filter(Boolean)).size
+    case 'workspace_is_clear':
+      return activeTransports.length === 0
+    case 'workspace_has_active_media':
+      return state.workspaceTransport.some((transport) => Boolean(transport.playingMedia?.uuid))
+    case 'workspace_time_remaining_lowest':
+      return remainingTimes.length ? Math.min(...remainingTimes) : undefined
+    case 'workspace_current_media_names':
+      return state.workspaceTransport.map((transport) => transport.playingMedia?.name).filter(Boolean).join(', ')
+    case 'workspace_current_cue_names':
+      return state.workspaceTransport.map((transport) => transport.playingItem?.name).filter(Boolean).join(', ')
+    case 'workspace_effects':
+      return state.workspaceEffects.map((effect) => effect.name).filter(Boolean).join(', ')
+    case 'workspace_effect_count':
+      return state.workspaceEffects.length
+    case 'workspace_effect_preset_name':
+      return state.workspaceEffectPreset?.name
+    case 'workspace_effect_preset_uuid':
+      return state.workspaceEffectPreset?.uuid
+    case 'workspace_effect_preset_effect_count':
+      return state.workspaceEffectPreset?.effects.length ?? 0
+    case 'workspace_transition_name':
+      return state.workspaceTransition?.name
+    case 'workspace_transition_uuid':
+      return state.workspaceTransition?.uuid
+    case 'workspace_transition_enabled':
+      return state.workspaceTransition?.enabled
+    case 'workspace_transition_duration':
+      return state.workspaceTransitionDuration
+    case 'workspace_transition_variable_count':
+      return state.workspaceTransition?.variables.length ?? 0
+    default:
+      return undefined
+  }
+}
+
+function getEffectField(
+  effect: PvpEffect | undefined,
+  variableIndex: number,
+  field: string,
+): string | number | boolean | undefined {
+  if (!effect) return undefined
+
+  const variable = effect.variables[variableIndex]
+
+  switch (field) {
+    case 'name':
+      return effect.name
+    case 'uuid':
+      return effect.uuid
+    case 'enabled':
+      return effect.enabled
+    case 'variable_count':
+      return effect.variables.length
+    case 'variable_name':
+      return variable?.name
+    case 'variable_type':
+      return variable?.type
+    case 'variable_value':
+      return variable?.value
+    case 'variable_min':
+      return variable?.min
+    case 'variable_max':
+      return variable?.max
+    case 'variable_color':
+      return variable?.color
+    case 'variable_default':
+      return variable?.default
+    default:
+      return undefined
+  }
+}
+
+function getCatalogField(
+  state: PvpState,
+  catalog: string,
+  index: number,
+  field: string,
+): string | number | boolean | undefined {
+  if (catalog === 'target_set') {
+    const entry = state.targetSets[index]
+    if (!entry) return undefined
+    if (field === 'name') return entry.name
+    if (field === 'uuid') return entry.uuid
+    return undefined
+  }
+
+  if (catalog === 'blend_mode') {
+    const entry = state.blendModes[index]
+    if (!entry) return undefined
+    if (field === 'name') return entry.name
+    if (field === 'id') return entry.id
+    return undefined
+  }
+
+  if (catalog === 'layer_preset') {
+    const entry = state.layerPresets[index]
+    if (!entry) return undefined
+    if (field === 'name') return entry.name
+    if (field === 'id') return entry.id
+    return undefined
+  }
+
+  if (catalog === 'effect_preset') {
+    const entry = state.effectPresets[index]
+    if (!entry) return undefined
+    if (field === 'name') return entry.name
+    if (field === 'uuid') return entry.uuid
+    if (field === 'effect_count') return entry.effects.length
+    return undefined
+  }
+
+  if (catalog === 'transition') {
+    const entry = state.transitions[index]
+    if (!entry) return undefined
+    if (field === 'name') return entry.name
+    if (field === 'uuid') return entry.uuid
+    if (field === 'enabled') return entry.enabled
+    if (field === 'variable_count') return entry.variables.length
+    return undefined
+  }
+
+  if (catalog === 'available_effect') {
+    const entry = state.availableEffects[index]
+    if (!entry) return undefined
+    if (field === 'name') return entry.name
+    if (field === 'uuid') return entry.uuid
+    if (field === 'enabled') return entry.enabled
+    if (field === 'variable_count') return entry.variables.length
+  }
+
+  return undefined
+}
+
+function compareValues(actual: unknown, comparison: string, expected: unknown): boolean {
+  if (comparison === 'truthy') return isTruthyValue(actual)
+  if (comparison === 'falsy') return !isTruthyValue(actual)
+  if (actual === undefined || actual === null) return false
+
+  if (['gt', 'gte', 'lt', 'lte'].includes(comparison)) {
+    return compareNumbers(Number(actual), comparison, Number(expected))
+  }
+
+  const actualString = String(actual)
+  const expectedString = String(expected ?? '').trim()
+
+  switch (comparison) {
+    case 'eq':
+      return actualString === expectedString
+    case 'ne':
+      return actualString !== expectedString
+    case 'contains':
+      return actualString.toLowerCase().includes(expectedString.toLowerCase())
+    case 'not_contains':
+      return !actualString.toLowerCase().includes(expectedString.toLowerCase())
+    default:
+      return false
+  }
+}
+
+function isTruthyValue(value: unknown): boolean {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'number') return value !== 0
+  if (typeof value !== 'string') return Boolean(value)
+
+  const normalized = value.trim().toLowerCase()
+  return ['true', 'yes', '1', 'on', 'enabled', 'ok', 'playing', 'active'].includes(normalized)
 }
 
 function compareNumbers(actual: number | undefined, comparison: string, expected: number): boolean {
@@ -432,6 +764,17 @@ function layerIndexOption() {
   }
 }
 
+function playlistIndexOption() {
+  return {
+    type: 'number' as const,
+    id: 'playlistIndex',
+    label: 'Playlist Index',
+    min: 0,
+    max: 999,
+    default: 0,
+  }
+}
+
 function compareOption(defaultValue = 'eq') {
   return {
     type: 'dropdown' as const,
@@ -439,6 +782,21 @@ function compareOption(defaultValue = 'eq') {
     label: 'Comparison',
     default: defaultValue,
     choices: COMPARE_CHOICES,
+  }
+}
+
+function dropdownOption(
+  id: string,
+  label: string,
+  choices: Array<{ id: string; label: string }>,
+  defaultValue: string,
+) {
+  return {
+    type: 'dropdown' as const,
+    id,
+    label,
+    default: defaultValue,
+    choices,
   }
 }
 
