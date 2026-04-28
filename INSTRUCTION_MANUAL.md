@@ -2,6 +2,12 @@
 
 This module is for displaying and reacting to live PVP state in Companion. Use the official **Renewed Vision: PVP 3** module for control actions like firing cues. Use this module when a button needs text, timers, labels, or automatic styling from PVP.
 
+## Important Numbering Note
+
+PVP data uses zero-based numbering in this module. That means the first item is `0`, not `1`.
+
+For example, the top playlist is `playlist_0`, the first cue in that playlist is `cue_0`, and the first layer/transport is usually `layer_0` or `transport_0`. If you are thinking "Layer 1" in the PVP interface, the matching variable will usually use `_0`. If you are thinking "Layer 2", the variable will usually use `_1`.
+
 All variable strings use the module shortname:
 
 ```txt
@@ -13,8 +19,6 @@ Example format:
 ```txt
 $(pvp-vars:variable_name_here)
 ```
-
-Most indexes are zero-based. Index `0` means the first playlist, cue, layer, transport, effect, preset, or catalog item returned by PVP.
 
 ## Playlist Variables
 

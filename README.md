@@ -4,6 +4,12 @@ A Bitfocus Companion sister module for Renewed Vision ProVideoPlayer (PVP), name
 
 This module is meant to run alongside the official PVP control module. The official module is still the right place for firing cues and controlling PVP. This module focuses on live data: variables, timers, layer state, catalogs, effects, transitions, and feedbacks that can automatically change Companion button styles.
 
+## Important Numbering Note
+
+PVP data uses zero-based numbering in this module. That means the first item is `0`, not `1`.
+
+For example, the top playlist is `playlist_0`, the first cue in that playlist is `cue_0`, and the first layer/transport is usually `layer_0` or `transport_0`. If you are thinking "Layer 1" in the PVP interface, the matching variable will usually use `_0`. If you are thinking "Layer 2", the variable will usually use `_1`.
+
 ## Features
 
 - Polls PVP's JSON API for playlists, cues, layers, workspace transport state, effects, transitions, presets, target sets, blend modes, and derived workspace status.
