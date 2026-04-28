@@ -1,5 +1,5 @@
 {
-  "name": "companion-module-renewedvision-pvp-dev",
+  "name": "companion-module-renewedvision-pvp-variables",
   "version": "0.0.1",
   "license": "MIT",
   "type": "commonjs",
@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "build": "tsc && companion-module-build",
-    "lint": "companion-module-lint"
+    "lint": "companion-module-check"
   },
   "dependencies": {
     "@companion-module/base": "^1.10.0"

@@ -4,7 +4,7 @@ import {
   runEntrypoint,
   type CompanionVariableValues,
 } from '@companion-module/base'
-import { getPlaylists, getTransportState } from './api'
+import { getLayers, getPlaylists, getTransportState } from './api'
 import { getConfigFields, normalizeConfig } from './config'
 import { getFeedbackDefinitions } from './feedbacks'
 import { getPresetDefinitions } from './presets'
@@ -15,7 +15,7 @@ import { buildVariableDefinitions, buildVariableValues, structureSignature } fro
 class PvpDevInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
   private config: ModuleConfig = normalizeConfig(undefined)
   private secrets: ModuleSecrets = {}
-  private state: PvpState = { playlists: [], workspaceTransport: [] }
+  private state: PvpState = { playlists: [], layers: [], workspaceTransport: [] }
   private pollTimer: NodeJS.Timeout | undefined
   private pollInFlight = false
   private lastStructureSig = ''
@@ -77,12 +77,13 @@ class PvpDevInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
     this.pollInFlight = true
 
     try {
-      const [playlists, workspaceTransport] = await Promise.all([
+      const [playlists, layers, workspaceTransport] = await Promise.all([
         getPlaylists(this.config, this.secrets),
+        getLayers(this.config, this.secrets),
         getTransportState(this.config, this.secrets),
       ])
 
-      this.state = { playlists, workspaceTransport }
+      this.state = { playlists, layers, workspaceTransport }
 
       const nextSig = structureSignature(this.state)
       if (nextSig !== this.lastStructureSig) {

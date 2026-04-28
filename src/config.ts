@@ -56,11 +56,11 @@ export function getConfigFields(): SomeCompanionConfigField[] {
       default: DEFAULT_CONFIG.pollIntervalMs,
     },
     {
-      type: 'static-text',
-      id: 'tokenNote',
+      type: 'secret-text',
+      id: 'token',
       width: 12,
-      label: 'Auth',
-      value: 'Use the module secret field for API token when required.',
+      label: 'Auth Token',
+      default: '',
     },
   ]
 }

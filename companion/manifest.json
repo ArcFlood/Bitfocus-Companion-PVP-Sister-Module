@@ -1,13 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/bitfocus/companion-module-tools/main/packages/companion-module-validate/manifest-schema.json",
-  "id": "renewedvision-pvp-dev",
-  "name": "PVP Sister Module (Dev)",
-  "shortname": "pvp-dev",
-  "description": "Companion sister module for ProVideoPlayer cue variables and active cue feedback.",
+  "id": "renewedvision-pvp-variables",
+  "name": "Bitfocus Companion Renewed Vision PVP Variables",
+  "shortname": "pvp-vars",
+  "description": "Companion sister module for Renewed Vision PVP variables, timers, layer state, and live feedback.",
   "version": "0.0.1",
   "license": "MIT",
-  "repository": "https://github.com/example/companion-module-renewedvision-pvp-dev",
-  "bugs": "https://github.com/example/companion-module-renewedvision-pvp-dev/issues",
+  "repository": "https://github.com/ArcFlood/companion-module-renewedvision-pvp-variables",
+  "bugs": "https://github.com/ArcFlood/companion-module-renewedvision-pvp-variables/issues",
   "runtime": {
     "type": "node18",
     "api": "nodejs-ipc",
@@ -15,13 +15,13 @@
     "entrypoint": "../dist/main.js"
   },
   "manufacturer": "Renewed Vision",
-  "product": "ProVideoPlayer",
-  "products": ["ProVideoPlayer"],
+  "product": "PVP Variables",
+  "products": ["PVP Variables"],
   "maintainers": [
     {
       "name": "ArcFlood"
     }
   ],
   "legacyIds": [],
-  "keywords": ["pvp", "renewedvision", "video"]
+  "keywords": ["pvp", "renewedvision", "video", "variables", "feedbacks", "timers"]
 }

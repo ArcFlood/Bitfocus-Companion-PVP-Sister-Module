@@ -1,40 +1,40 @@
-# Companion Module: Renewed Vision PVP (Dev Sister Module)
+# Bitfocus Companion Renewed Vision PVP Variables
 
-This module adds:
-- Dynamic cue-name variables from PVP playlists
-- Active cue feedback for button highlighting
+This module adds live variables, timers, and feedbacks for Renewed Vision ProVideoPlayer (PVP). It is named **PVP Variables** to distinguish it from the main Renewed Vision PVP 3 control module.
 
 ## Configuration
 
-- **Host**: PVP host/IP
-- **Port**: PVP API port (default: `49343`)
-- **Use HTTPS**: enable if your endpoint is TLS-enabled
-- **Auth Token**: optional bearer token
+- **Host**: PVP host/IP or full URL
+- **Port**: PVP API port, default `49343`
+- **Use HTTPS**: match PVP's Network Preferences
+- **Auth Token**: optional token from PVP Network Preferences
 - **Poll Interval (ms)**: default `750`
 
 ## Variables
 
-Variables are generated for each discovered cue:
+Examples:
 
-- `playlist_{playlistIndex}_cue_{cueIndex}_name`
+```txt
+$(renewedvision-pvp-variables:playlist_0_cue_1_name)
+$(renewedvision-pvp-variables:transport_0_time_remaining_clock)
+$(renewedvision-pvp-variables:transport_0_playing_media_name)
+$(renewedvision-pvp-variables:layer_0_opacity)
+```
 
-Example label usage:
+Variables are generated for discovered playlists, cues, layers, effects, and transport states.
 
-`$(renewedvision-pvp-dev:playlist_0_cue_1_name)`
+## Feedbacks
 
-## Feedback
+Use feedbacks to automatically style Companion buttons based on PVP state.
 
-### Cue is active
-
-Options:
-- Playlist Index
-- Cue Index
-
-Returns true when the configured cue UUID matches PVP's currently playing item UUID.
+Available feedbacks include active cue, active playlist, active layer, layer muted/hidden, opacity compare, target set match, effect preset match, active effect, transition match, transition duration compare, playing item/media match, time remaining compare, playing state, scrubbing state, and playback rate compare.
 
 ## Notes
 
-- This is designed as a sister module and does not replace the official PVP actions module.
-- Polling endpoints used:
+- This module reads PVP's JSON API. It does not replace the official PVP control/action module.
+- Most indexes are zero-based.
+- Reordering playlists, cues, or layers in PVP can change index-based variable meanings.
+- Polling endpoints include:
   - `/api/0/data/playlists`
+  - `/api/0/data/layers`
   - `/api/0/transportState/workspace`

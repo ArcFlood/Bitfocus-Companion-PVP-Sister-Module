@@ -8,7 +8,7 @@ export function getPresetDefinitions(): CompanionPresetDefinitions {
       category: 'Cue Names',
       name: 'Cue 0.0 Active Highlight',
       style: {
-        text: '$(renewedvision-pvp-dev:playlist_0_cue_0_name)',
+        text: '$(renewedvision-pvp-variables:playlist_0_cue_0_name)',
         size: '14',
         color: 0xffffff,
         bgcolor: 0x000000,
