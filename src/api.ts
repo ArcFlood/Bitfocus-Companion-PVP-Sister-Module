@@ -191,6 +191,56 @@ export async function getPvpState(config: ModuleConfig, secrets: ModuleSecrets):
   }
 }
 
+export async function getPvpLiveState(
+  config: ModuleConfig,
+  secrets: ModuleSecrets,
+  previousState: PvpState,
+): Promise<PvpState> {
+  const [playlists, baseLayers, workspaceTransport] = await Promise.all([
+    getPlaylists(config, secrets),
+    getLayers(config, secrets),
+    getTransportState(config, secrets),
+  ])
+
+  const enrichedLayers = baseLayers.map((layer) => mergeLayerWithPrevious(layer, previousState))
+
+  return {
+    ...previousState,
+    playlists,
+    layers: enrichedLayers,
+    workspaceTransport: workspaceTransport.map((transport) => ({
+      ...transport,
+      layer: transport.layer
+        ? enrichTransportLayer(
+            transport.layer,
+            enrichedLayers,
+            new Map(previousState.targetSets.map((targetSet) => [targetSet.uuid, targetSet.name])),
+            new Map(previousState.effectPresets.map((preset) => [preset.uuid, preset.name])),
+          )
+        : undefined,
+    })),
+    lastPollTime: new Date().toISOString(),
+    lastPollError: undefined,
+  }
+}
+
+function mergeLayerWithPrevious(layer: PvpLayer, previousState: PvpState): PvpLayer {
+  const previousLayer = previousState.layers.find((candidate) => candidate.uuid && candidate.uuid === layer.uuid)
+  if (!previousLayer) return layer
+
+  return {
+    ...layer,
+    targetSetName: layer.targetSetName ?? previousLayer.targetSetName,
+    effectPresetName: layer.effectPresetName ?? previousLayer.effectPresetName,
+    layerPresetName: layer.layerPresetName ?? previousLayer.layerPresetName,
+    layerPresetId: layer.layerPresetId ?? previousLayer.layerPresetId,
+    blendMode: layer.blendMode ?? previousLayer.blendMode,
+    blend: layer.blend ?? previousLayer.blend,
+    transition: layer.transition ?? previousLayer.transition,
+    transitionDuration: layer.transitionDuration ?? previousLayer.transitionDuration,
+  }
+}
+
 async function getTargetSets(config: ModuleConfig, secrets: ModuleSecrets): Promise<PvpNamedUuid[]> {
   const payload = await fetchOptionalJson<unknown>(config, secrets, '/targetSet')
   return parseDataArray(payload, 'targetSet', normalizeNamedUuid)
