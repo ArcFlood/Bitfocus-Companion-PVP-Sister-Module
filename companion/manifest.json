@@ -6,8 +6,8 @@
   "description": "Companion sister module for Renewed Vision PVP variables, timers, layer state, and live feedback.",
   "version": "0.0.1",
   "license": "MIT",
-  "repository": "https://github.com/ArcFlood/companion-module-renewedvision-pvp-variables",
-  "bugs": "https://github.com/ArcFlood/companion-module-renewedvision-pvp-variables/issues",
+  "repository": "https://github.com/ArcFlood/Bitfocus-Companion-PVP-Variables-Module",
+  "bugs": "https://github.com/ArcFlood/Bitfocus-Companion-PVP-Variables-Module/issues",
   "runtime": {
     "type": "node18",
     "api": "nodejs-ipc",
