@@ -4,7 +4,7 @@ import {
   runEntrypoint,
   type CompanionVariableValues,
 } from '@companion-module/base'
-import { getLayers, getPlaylists, getTransportState } from './api'
+import { getPvpState } from './api'
 import { getConfigFields, normalizeConfig } from './config'
 import { getFeedbackDefinitions } from './feedbacks'
 import { getPresetDefinitions } from './presets'
@@ -15,7 +15,18 @@ import { buildVariableDefinitions, buildVariableValues, structureSignature } fro
 class PvpDevInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
   private config: ModuleConfig = normalizeConfig(undefined)
   private secrets: ModuleSecrets = {}
-  private state: PvpState = { playlists: [], layers: [], workspaceTransport: [] }
+  private state: PvpState = {
+    playlists: [],
+    layers: [],
+    workspaceTransport: [],
+    workspaceEffects: [],
+    targetSets: [],
+    blendModes: [],
+    layerPresets: [],
+    effectPresets: [],
+    transitions: [],
+    availableEffects: [],
+  }
   private pollTimer: NodeJS.Timeout | undefined
   private pollInFlight = false
   private lastStructureSig = ''
@@ -77,13 +88,7 @@ class PvpDevInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
     this.pollInFlight = true
 
     try {
-      const [playlists, layers, workspaceTransport] = await Promise.all([
-        getPlaylists(this.config, this.secrets),
-        getLayers(this.config, this.secrets),
-        getTransportState(this.config, this.secrets),
-      ])
-
-      this.state = { playlists, layers, workspaceTransport }
+      this.state = await getPvpState(this.config, this.secrets)
 
       const nextSig = structureSignature(this.state)
       if (nextSig !== this.lastStructureSig) {
@@ -95,6 +100,11 @@ class PvpDevInstance extends InstanceBase<ModuleConfig, ModuleSecrets> {
       this.checkFeedbacks()
       this.updateStatus(InstanceStatus.Ok)
     } catch (error: unknown) {
+      this.state = {
+        ...this.state,
+        lastPollError: error instanceof Error ? error.message : String(error),
+      }
+      this.setVariableValues(buildVariableValues(this.state) as CompanionVariableValues)
       this.updateStatus(InstanceStatus.ConnectionFailure)
       throw error
     } finally {
